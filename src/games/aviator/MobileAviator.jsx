@@ -1,0 +1,510 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import "./Mobileaviator.css";
+import UserMenuLayout from "../../shared/UserMenuLayout";
+import{fetchCurrentUser}from"../../shared/userSession";
+
+
+// const API = "http://localhost:8005";
+// const WS = "ws://localhost:8005/ws/game";
+
+import { API_BASE, websocketUrl } from "../../config.js";
+const API=API_BASE;
+const WS=websocketUrl("/ws/game");
+
+function formatMoney(n) {
+  return Number(n || 0).toFixed(2);
+}
+
+function historyClass(v) {
+  if (v >= 10) return "pill pink";
+  if (v >= 2) return "pill purple";
+  return "pill blue";
+}
+
+function Plane({ phase, multiplier }) {
+  const isBetting = phase === "betting";
+  const isFlying = phase === "flying";
+  const crashed = phase === "crashed";
+
+  const safeMultiplier=Math.max(1,Number(multiplier||1));
+  const progress=isFlying?Math.min(1,1-Math.exp(-(safeMultiplier-1)*0.58)):0;
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  /*
+   * The curve uses one fixed 1000x420 coordinate system on every phone.
+   * Keep the final X at 620 because the plane itself occupies about 34%
+   * of the canvas width; a 780 endpoint pushed its nose outside the stage.
+   */
+  const p0={x:35,y:360};
+  const p1={x:240,y:360};
+  const p2={x:500,y:220};
+  const p3={x:620,y:105};
+  const q0={x:lerp(p0.x,p1.x,progress),y:lerp(p0.y,p1.y,progress)};
+  const q1={x:lerp(p1.x,p2.x,progress),y:lerp(p1.y,p2.y,progress)};
+  const q2={x:lerp(p2.x,p3.x,progress),y:lerp(p2.y,p3.y,progress)};
+  const r0={x:lerp(q0.x,q1.x,progress),y:lerp(q0.y,q1.y,progress)};
+  const r1={x:lerp(q1.x,q2.x,progress),y:lerp(q1.y,q2.y,progress)};
+  const end={x:lerp(r0.x,r1.x,progress),y:lerp(r0.y,r1.y,progress)};
+  const clamp=(min,value,max)=>Math.max(min,Math.min(value,max));
+  let planeLeft=isFlying?clamp(8,end.x/10,62):8;
+  let planeBottom=isFlying?clamp(8,(420-end.y)/4.2,68):8;
+
+  if (crashed) {
+    /* Keep the final crash frame visible inside every screen size. */
+    planeLeft=62;
+    planeBottom=68;
+  }
+
+  const curve=`M ${p0.x} ${p0.y} C ${q0.x} ${q0.y}, ${r0.x} ${r0.y}, ${end.x} ${end.y}`;
+  const area=`${curve} L ${end.x} 420 L ${p0.x} 420 Z`;
+
+  return (
+    <>
+      {isFlying && (
+        <svg
+          className="flight-line-svg"
+          viewBox="0 0 1000 420"
+          preserveAspectRatio="none"
+        >
+          <defs><linearGradient id="flightFillMobile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e6003d" stopOpacity=".3"/><stop offset="1" stopColor="#e6003d" stopOpacity="0"/></linearGradient></defs>
+          <path d={area} fill="url(#flightFillMobile)"/>
+          <path className="flight-line" d={curve} fill="none" stroke="#e6003d" strokeWidth="6" strokeLinecap="round" vectorEffect="non-scaling-stroke"/>
+        </svg>
+      )}
+
+      <div
+        className={`plane-wrap ${isBetting ? "idle return-home" : ""} ${
+          isFlying ? "flying" : ""
+        } ${crashed ? "flew-away" : ""}`}
+        style={{
+          left: `${planeLeft}%`,
+          bottom: `${planeBottom}%`,
+        }}
+      >
+        <svg
+          className={`aviator-plane ${crashed ? "crash" : ""}`}
+          viewBox="0 0 520 210"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="planeRedMain" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ff004f" />
+              <stop offset="45%" stopColor="#f00048" />
+              <stop offset="100%" stopColor="#af002f" />
+            </linearGradient>
+
+            <filter id="planeGlowRed" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feColorMatrix
+                in="blur"
+                type="matrix"
+                values="1 0 0 0 1
+                        0 0 0 0 0
+                        0 0 0 0 0.25
+                        0 0 0 0.9 0"
+                result="glow"
+              />
+              <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <g filter="url(#planeGlowRed)">
+            <path
+              className="flame flame-a"
+              d="M52 136 C18 134 6 126 0 118 C31 121 58 122 91 124 Z"
+            />
+            <path
+              className="flame flame-b"
+              d="M70 154 C30 156 9 148 0 139 C39 137 69 137 112 139 Z"
+            />
+
+            <path
+              className="plane-body"
+              d="M35 126
+                 C98 123 151 118 205 109
+                 L327 73
+                 C357 65 388 61 421 63
+                 L485 65
+                 C507 66 520 75 519 86
+                 C518 97 505 104 481 108
+                 L354 130
+                 C286 142 224 149 155 150
+                 L60 151
+                 C39 151 28 145 27 137
+                 C26 131 29 127 35 126 Z"
+            />
+
+            <path
+              className="plane-nose"
+              d="M421 63 L490 65 C510 67 520 75 519 86 C517 96 506 102 482 107 L431 116 C454 94 453 76 421 63 Z"
+            />
+
+            <path
+              className="wing-main wing-animate"
+              d="M214 113
+                 L151 35
+                 C146 29 149 23 157 24
+                 L214 30
+                 C224 31 230 36 236 44
+                 L308 101 Z"
+            />
+
+            <path
+              className="wing-dark wing-animate"
+              d="M215 114 L169 52 L216 59 L282 103 Z"
+            />
+
+            <path
+              className="tail-top tail-animate"
+              d="M94 124
+                 L45 62
+                 C40 55 43 50 52 51
+                 L89 54
+                 C98 55 104 60 109 67
+                 L164 119 Z"
+            />
+
+            <path
+              className="tail-bottom tail-animate"
+              d="M237 146
+                 L174 199
+                 C167 205 159 203 155 196
+                 L143 173
+                 L202 145 Z"
+            />
+
+            <path className="rear-fin" d="M72 147 L34 181 L99 150 Z" />
+
+            <path className="window-line" d="M278 87 C316 78 358 74 405 76" />
+            <circle className="window" cx="363" cy="82" r="8" />
+            <circle className="window" cx="396" cy="79" r="7" />
+
+            <path className="cut-line" d="M126 128 C198 125 265 111 333 87" />
+            <path className="bottom-line" d="M59 145 C142 147 249 141 355 125" />
+
+            <text className="plane-x" x="330" y="114" transform="rotate(-8 330 114)">
+              X
+            </text>
+          </g>
+        </svg>
+
+        <div className="plane-smoke smoke-one" />
+        <div className="plane-smoke smoke-two" />
+        <div className="plane-smoke smoke-three" />
+      </div>
+    </>
+  );
+}
+
+function BetPanel({ seat, phase, multiplier, roundId, myBets, onNotice }) {
+  const [amount, setAmount] = useState(50);
+  const [auto, setAuto] = useState(false);
+
+  const activeBet = myBets.find((b) => b.seat === seat && b.round_id === roundId);
+  const canBet = phase === "betting" && !activeBet;
+  const canCashout = phase === "flying" && activeBet?.status === "active";
+
+  async function placeBet() {
+    try {
+      const res = await fetch(`${API}/api/games/aviator/bet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: "demo_user",
+          seat,
+          amount: Number(amount),
+        }),
+      });
+
+      const data = await res.json();
+      onNotice(data.message || "Done");
+    } catch {
+      onNotice("Backend not connected");
+    }
+  }
+
+  async function cashout() {
+    try {
+      const res = await fetch(`${API}/api/games/aviator/cashout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: "demo_user",
+          seat,
+        }),
+      });
+
+      const data = await res.json();
+      onNotice(data.message || "Done");
+    } catch {
+      onNotice("Backend not connected");
+    }
+  }
+
+  return (
+    <div className="bet-panel">
+      <div className="tab-switch">
+        <button className={!auto ? "active" : ""} onClick={() => setAuto(false)}>
+          Bet
+        </button>
+        <button className={auto ? "active" : ""} onClick={() => setAuto(true)}>
+          Auto
+        </button>
+      </div>
+
+      <div className="bet-body">
+        <div className="amount-box">
+          <div className="amount-input">
+            <button onClick={() => setAmount(Math.max(10, Number(amount || 0) - 10))}>
+              −
+            </button>
+            <input value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <button onClick={() => setAmount(Number(amount || 0) + 10)}>+</button>
+          </div>
+
+          <div className="quick">
+            <button onClick={() => setAmount(10)}>10</button>
+            <button onClick={() => setAmount(20)}>20</button>
+            <button onClick={() => setAmount(50)}>50</button>
+            <button onClick={() => setAmount(100)}>100</button>
+          </div>
+        </div>
+
+        {canCashout ? (
+          <button className="bet-btn orange" onClick={cashout}>
+            CASH OUT
+            <br />
+            <span>{formatMoney(Number(activeBet.amount) * multiplier)} INR</span>
+          </button>
+        ) : (
+          <button className="bet-btn" disabled={!canBet} onClick={placeBet}>
+            BET
+            <br />
+            <span>{formatMoney(amount)} INR</span>
+          </button>
+        )}
+      </div>
+
+      {activeBet && (
+        <div className={`bet-status ${activeBet.status}`}>
+          {activeBet.status === "cashed_out"
+            ? `Cashed out ${activeBet.cashout_multiplier}x = ${formatMoney(
+                activeBet.cashout_amount
+              )}`
+            : activeBet.status === "lost"
+            ? "Lost"
+            : "Bet accepted"}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  const [data, setData] = useState({
+    phase: "waiting",
+    multiplier: 1,
+    countdown: 0,
+    waiting_seconds: 30,
+    round_id: "",
+    history: [],
+    all_bets: [],
+    my_bets: [],
+  });
+
+  const [notice, setNotice] = useState("");
+  const [showHistory,setShowHistory]=useState(false);
+  const wsRef = useRef(null);
+
+  useEffect(() => {
+    let retry;
+
+    function connect() {
+      const ws = new WebSocket(WS);
+
+      ws.onopen = () => {
+        setNotice("Live connected");
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (msg.data) {
+          setData(msg.data);
+        }
+      };
+
+      ws.onclose = () => {
+        setNotice("Reconnecting...");
+        retry = setTimeout(connect, 1500);
+      };
+
+      ws.onerror = () => {
+        setNotice("Socket error");
+      };
+
+      wsRef.current = ws;
+    }
+
+    connect();
+
+    return () => {
+      clearTimeout(retry);
+      wsRef.current?.close();
+    };
+  }, []);
+
+  const totalBet = useMemo(() => {
+    return data.all_bets.reduce((sum, b) => sum + Number(b.bet || 0), 0);
+  }, [data.all_bets]);
+
+  const shownMultiplier =
+    data.phase === "betting" ? "WAITING" : `${Number(data.multiplier || 1).toFixed(2)}x`;
+  
+  const[user,setUser]=useState({user_name:"DEMO123",balance:0});
+
+  useEffect(()=>{
+    fetchCurrentUser().then(setUser);
+  },[]);
+
+  return (
+    <div className="mobile-aviator app">
+      <header className="top">
+        <div className="brand">
+          <span className="home">⌂</span>
+          <span>GOLD</span>
+          <b>365</b>
+        </div>
+
+      <div className="profile">
+        <span>🌐</span>
+        <span className="balance">{Number(user.balance||0).toFixed(2)}</span>
+        <UserMenuLayout/>
+        <span className="user">{user.user_name||"DEMO123"}</span>
+      </div>
+      </header>
+
+      <main className="layout">
+        <section className="game-area">
+          <div className="history-wrap">
+            <div className="history">
+              {[...(data.history||[])].reverse().slice(0,100).map((v,i)=>(
+                <span key={i} className={historyClass(v)}>{Number(v).toFixed(2)}x</span>
+              ))}
+              <button className={`drop ${showHistory?"open":""}`} onClick={()=>setShowHistory(!showHistory)}>⌄</button>
+            </div>
+            {showHistory&&(
+              <div className="history-dropdown">
+                {[...(data.history||[])].reverse().map((v,i)=>(
+                  <span key={i} className={historyClass(v)}>{Number(v).toFixed(2)}x</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+            <div
+              className={`canvas ${
+                data.phase === "betting" ? "waiting-mode" : ""
+              } ${data.phase === "flying" ? "flying-mode" : ""} ${
+                data.phase === "crashed" ? "crashed-mode" : ""
+              } ${
+                Number(data.multiplier || 1) >= 10
+                  ? "hot-bg"
+                  : Number(data.multiplier || 1) >= 2
+                  ? "mid-bg"
+                  : "low-bg"
+              }`}
+            >
+            <div className="rays" />
+
+            <div className="axis y">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <span key={i}>•</span>
+              ))}
+            </div>
+
+            <div className="axis x">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                <span key={i}>•</span>
+              ))}
+            </div>
+
+              {data.phase === "betting" ? (
+                <div className="waiting-box">
+                  <div className="loader-plane">
+                    <svg viewBox="0 0 80 80">
+                      <path d="M40 4 53 37 76 44 54 52 41 76 31 51 5 43 30 36z" />
+                    </svg>
+                    <span className="loader-ring ring-1" />
+                    <span className="loader-ring ring-2" />
+                    <span className="loader-ring ring-3" />
+                  </div>
+
+                  <div className="waiting-text">WAITING FOR NEXT ROUND</div>
+
+                  <div className="timer-bar">
+                    <div
+                      className="timer-fill"
+                      style={{
+                        width: `${Math.max(
+                          0,
+                          Math.min(
+                            100,
+                            (Number(data.countdown || 0) /
+                              Number(data.waiting_seconds || 30)) *
+                              100
+                          )
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ): data.phase === "crashed" ? (
+              <div className="crash-center">
+                <div className="flew-text">FLEW AWAY!</div>
+                <div className="flew-multiplier">
+                  {Number(data.crashed_at || data.multiplier || 1).toFixed(2)}x
+                </div>
+              </div>
+            ) : (
+              <div className="multiplier">{shownMultiplier}</div>
+            )}
+
+            <Plane phase={data.phase} multiplier={Number(data.multiplier || 1)} />
+          </div>
+
+          <div className="round">Round Id: {data.round_id}</div>
+
+          <div className="panels">
+            <BetPanel
+              seat={1}
+              phase={data.phase}
+              multiplier={Number(data.multiplier || 1)}
+              roundId={data.round_id}
+              myBets={data.my_bets || []}
+              onNotice={setNotice}
+            />
+
+            <BetPanel
+              seat={2}
+              phase={data.phase}
+              multiplier={Number(data.multiplier || 1)}
+              roundId={data.round_id}
+              myBets={data.my_bets || []}
+              onNotice={setNotice}
+            />
+          </div>
+        </section>
+      </main>
+
+      <div className="toast">
+        {notice} <span>Total bets: {formatMoney(totalBet)}</span>
+      </div>
+    </div>
+  );
+}
+
+export default App;
