@@ -733,100 +733,6 @@ img{
   }
 }
 
-/* Keep Android status icons outside the game header on every phone. */
-.mlr-page{
-  padding-top:max(24px,env(safe-area-inset-top,0px)) !important;
-}
-
-/* Final alignment and authentic race-game surface. */
-.mlr-page{
-  width:100%;
-  max-width:460px;
-  margin:0 auto;
-  padding-left:8px!important;
-  padding-right:8px!important;
-  padding-bottom:88px!important;
-  background:linear-gradient(180deg,#090b10,#030407 72%)!important;
-}
-.mlr-page::before{
-  background:radial-gradient(circle at 50% 24%,#38204466,transparent 34%),linear-gradient(180deg,#0b0e14,#030406 75%);
-}
-.mlr-page::after{opacity:.055;filter:saturate(.7)}
-.mlr-header{
-  width:100%;
-  height:56px;
-  padding:6px 8px 6px 11px;
-  border:1px solid #ffffff1b;
-  border-radius:13px;
-  background:#0c0f15f5;
-  box-shadow:0 8px 22px #0008;
-}
-.mlr-header-brand{gap:6px;font-size:20px;color:#f0c94d;text-shadow:0 0 12px #c998294d}
-.mlr-header-brand span{font-size:23px}
-.mlr-account{min-width:0;display:grid;grid-template-columns:auto 34px;grid-template-rows:27px 12px;align-items:center;column-gap:5px}
-.mlr-balance{height:27px;min-width:75px;padding:4px 7px;display:flex;flex-direction:column;justify-content:center;border:1px solid #ffffff17;border-radius:8px;background:#171b22}
-.mlr-balance small{color:#65707f;font-size:6px;line-height:1}.mlr-balance b{margin-top:3px;color:#fff;font-size:10px;line-height:1}
-.mlr-account>.uml-menu-btn,.mlr-account>[class*="menu"]{grid-column:2;grid-row:1;width:30px;height:30px}
-.mlr-user{grid-column:1/3;grid-row:2;max-width:115px;justify-self:end;overflow:hidden;color:#87909d;font-size:7px;letter-spacing:.6px;text-overflow:ellipsis;white-space:nowrap}
-.mlr-results{
-  width:100%;
-  height:51px;
-  margin:7px 0!important;
-  padding:5px 7px;
-  gap:6px;
-  overflow:hidden;
-  border:1px solid #ffffff14;
-  border-radius:10px!important;
-  background:#0c1016;
-  box-shadow:none;
-}
-.mlr-results>b{min-width:40px;width:40px;height:30px;padding:0;background:transparent;color:#687382;font-size:7px;letter-spacing:.8px}
-.mlr-result-list{width:calc(100% - 46px);gap:6px;overflow:hidden}
-.mlr-result-logo{width:36px;height:36px;flex-basis:36px;border:1px solid #59616d;box-shadow:none}
-.mlr-board{
-  width:100%!important;
-  max-width:430px;
-  aspect-ratio:400/640;
-  border:1px solid #ffffff12!important;
-  border-radius:18px!important;
-  background-color:#06080d;
-  box-shadow:0 14px 35px #0009!important;
-}
-.mlr-track-logo{border-color:#737986!important;box-shadow:0 3px 7px #000b!important}
-.mlr-track-logo.active{border-color:#35e37d!important;transform:translate(-50%,-50%) scale(1.13);box-shadow:0 0 12px #20d86c,0 0 22px #20d86c66!important}
-.mlr-moving-marker{border-color:#f0c949;box-shadow:0 0 15px #e9b52d,0 0 28px #e9b52d66}
-.mlr-center-dashboard{top:38%!important;width:69%!important}
-.mlr-round-id{top:-3.7cqw!important;min-width:36cqw!important;padding:.7cqw 2cqw!important;background:#080b10e8;color:#858e9b;font-size:2.25cqw!important;letter-spacing:.35px}
-.mlr-dashboard-panel{height:30cqw!important;padding:3.8cqw 2cqw 2cqw!important}
-.mlr-dash-main{height:11cqw!important}.mlr-dash-box{padding:0 2cqw!important}.mlr-dash-box small{color:#858e9b;font-size:2.4cqw!important}.mlr-dash-box b{font-size:3.8cqw!important}.mlr-dash-box.right b{color:#32df7a}
-.mlr-progress-wrap{height:3.7cqw!important;margin:1.7cqw 1.5cqw 0!important;border:1px solid #ffffff1a!important;background:#111720!important}
-.mlr-progress-fill{background:repeating-linear-gradient(135deg,#e12a51 0 9px,#e12a51 9px 18px,#d9ad35 18px 27px,#d9ad35 27px 36px);box-shadow:0 0 8px #d63d5866;animation:none}
-.mlr-progress-car{top:-2.6cqw!important;font-size:4.8cqw!important}.mlr-finish{top:-2.4cqw!important;font-size:5.5cqw!important}
-.mlr-time-left{display:flex!important;margin-top:1.4cqw;gap:3px}.mlr-time-left span,.mlr-time-left small{color:#737d89;font-size:2cqw}.mlr-time-left b{color:#f0cb51;font-size:4cqw}
-.mlr-betting-grid{left:10px;right:10px;bottom:9px;height:140px;border:1px solid #ffffff1b;border-radius:13px;background:#090c12e8;box-shadow:0 -8px 28px #0008}
-.mlr-bet-cell{border-color:#ffffff12;background:linear-gradient(180deg,#11151c,#090c11)}.mlr-bet-cell:active{background:#1a2029;transform:scale(.96)}
-.mlr-bet-logo{top:7px;width:32px;height:32px}.mlr-bet-cell span,.mlr-rupee{bottom:8px;color:#d8b843;font-size:11px;text-shadow:none}
-.mlr-winner-popup{top:42%;width:132px;height:105px;border:1px solid #e5be46;border-radius:13px;background:#080b10ed;box-shadow:0 0 22px #d7aa3a66;animation:mlrWinnerIn .2s ease-out}.mlr-winner-popup small{color:#7f8996;font-size:6px;letter-spacing:1px}.mlr-winner-popup img{width:49px;height:49px}.mlr-winner-popup b{color:#e7c44e;font-size:10px}
-.mlr-coins{
-  position:fixed;
-  left:50%;
-  bottom:8px;
-  z-index:90;
-  transform:translateX(-50%);
-  width:min(calc(100% - 16px),444px);
-  height:68px;
-  margin:0;
-  padding:7px;
-  gap:6px;
-  border:1px solid #ffffff1a;
-  border-radius:14px;
-  background:#0b0e14f4;
-  box-shadow:0 -10px 26px #000b;
-}
-.mlr-coins button{flex:0 1 48px;width:48px;height:48px;font-size:10px;border-width:3px;box-shadow:inset 0 0 8px #ffffff66}.mlr-coins button.active{transform:translateY(-4px) scale(1.06);box-shadow:0 4px 15px #e9c34f99,inset 0 0 9px #fff8}.mlr-coins .clear{flex:0 1 65px;width:65px;height:42px;border:1px solid #d4475d;border-radius:9px;background:#8e1730;font-size:10px}
-@keyframes mlrWinnerIn{from{opacity:0;transform:translate(-50%,-50%) scale(.75)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-@media(max-width:370px){.mlr-header-brand{font-size:17px}.mlr-header-brand span{font-size:20px}.mlr-balance{min-width:65px}.mlr-coins{gap:4px}.mlr-coins button{width:43px;height:43px;flex-basis:43px}.mlr-coins .clear{width:56px;flex-basis:56px}}
-
 @media screen and (max-width:768px) and (orientation:landscape){
   .mlr-page{
     display:none;
@@ -1018,7 +924,6 @@ flex-shrink:0;
   max-width:480px;
   height:auto !important;
   aspect-ratio:400 / 665;
-  container-type:inline-size;
   margin-left:auto;
   margin-right:auto;
   overflow:hidden;
@@ -1031,38 +936,10 @@ flex-shrink:0;
   transform:translateX(-50%) !important;
 }
 
-/* Scale the complete centre table from the board width, not from the phone
-   viewport. 1cqw is always 1% of .mlr-board on every Android device. */
-.mlr-dashboard-panel{
-  min-height:0 !important;
-  height:34cqw !important;
-  padding:4.5cqw 2.5cqw 2.5cqw !important;
-  border-radius:6cqw !important;
-}
-
-.mlr-round-id{
-  top:-4.5cqw !important;
-  min-width:42.5cqw !important;
-  padding:1cqw 2.5cqw !important;
-  font-size:2.75cqw !important;
-}
-
-.mlr-dash-main{
-  height:13.5cqw !important;
-  border-radius:3.5cqw !important;
-}
-
-.mlr-dash-box{padding:0 3cqw !important;}
-.mlr-dash-box small{font-size:3cqw !important;}
-.mlr-dash-box b{
-  margin-top:1cqw !important;
-  font-size:4.75cqw !important;
-}
-
 .mlr-progress-wrap{
-  width:calc(100% - 4cqw) !important;
-  height:5cqw !important;
-  margin:2.5cqw 2cqw 0 !important;
+  width:calc(100% - 16px);
+  height:clamp(16px,5vw,20px) !important;
+  margin:clamp(8px,2.5vw,12px) 8px 0 !important;
   overflow:hidden;
 }
 
@@ -1071,14 +948,14 @@ flex-shrink:0;
 }
 
 .mlr-progress-car{
-  top:-2.5cqw !important;
-  font-size:5.25cqw !important;
+  top:clamp(-10px,-2.2vw,-7px);
+  font-size:clamp(17px,5vw,21px);
 }
 
 .mlr-finish{
-  right:0 !important;
-  top:-2.25cqw !important;
-  font-size:6.25cqw !important;
+  right:0;
+  top:clamp(-9px,-2vw,-6px);
+  font-size:clamp(20px,6vw,25px);
 }
 
 .mlr-track-area{
@@ -1090,8 +967,9 @@ flex-shrink:0;
 }
 
 .mlr-track-logo{
-  width:10.25cqw !important;
-  height:10.25cqw !important;
+  width:10.25% !important;
+  height:auto !important;
+  aspect-ratio:1 / 1;
   min-width:0 !important;
   min-height:0 !important;
   border-width:clamp(1px,.5vw,2px);
@@ -1104,14 +982,15 @@ flex-shrink:0;
 }
 
 .mlr-moving-marker{
-  width:15cqw !important;
-  height:15cqw !important;
+  width:15% !important;
+  height:auto !important;
+  aspect-ratio:1 / 1;
   border-width:clamp(3px,1.2vw,5px);
 }
 
 .mlr-moving-marker img{
-  width:12.5cqw !important;
-  height:12.5cqw !important;
+  width:83.333% !important;
+  height:83.333% !important;
   object-fit:cover;
 }
 
@@ -1131,17 +1010,12 @@ flex-shrink:0;
   }
 
   .mlr-track-logo{
-    width:10.25cqw !important;
-    height:10.25cqw !important;
+    width:10.25% !important;
+    height:auto !important;
   }
 
   .mlr-moving-marker{
-    width:15cqw !important;
-    height:15cqw !important;
+    width:15% !important;
+    height:auto !important;
   }
-}
-
-/* Final native safe-area override (must remain last in this file). */
-.mlr-page{
-  padding-top:max(24px,env(safe-area-inset-top,0px)) !important;
 }

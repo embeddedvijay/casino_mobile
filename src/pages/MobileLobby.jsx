@@ -7,16 +7,17 @@ const games=[
   {path:"/dragon-tiger",tag:"LIVE",category:"Casino",image:"/casino-assets/dragon-tiger.png",name:"Dragon Tiger",accent:"#ffba25",players:"1.6K"},
   {path:"/lucky-race",tag:"NEW",category:"Racing",image:"/casino-assets/lucky-race.png",name:"Lucky Race",accent:"#a970ff",players:"928"},
   {path:"/matka",tag:"POPULAR",category:"Matka",image:"/casino-assets/matka.png",name:"Matka",accent:"#df4cff",players:"4.2K"}
+  ,{path:"/color-ball",tag:"FREE",category:"Free",image:"/casino-assets/color-ball.svg",name:"Color Blast",accent:"#35dfff",players:"PLAY"}
 ];
 
-const categories=["All Games","Crash","Casino","Racing","Matka"];
+const categories=["All Games","Free","Crash","Casino","Racing","Matka"];
 
 export default function MobileLobby(){
   const [category,setCategory]=useState("All Games");
   const filtered=category==="All Games"?games:games.filter((game)=>game.category===category);
 
-  const openGame=(path)=>{
-    window.location.href=`/login?redirect=${encodeURIComponent(path)}`;
+  const openGame=(path,category)=>{
+    window.location.href=category==="Free"?path:`/login?redirect=${encodeURIComponent(path)}`;
   };
 
   return(
@@ -77,7 +78,7 @@ export default function MobileLobby(){
           {categories.map((item)=><button className={category===item?"active":""} key={item} onClick={()=>setCategory(item)}>{item}</button>)}
         </div>
         <div className="game-grid">
-          {filtered.map((game)=><article className="game-card" key={game.path} style={{"--accent":game.accent}} onClick={()=>openGame(game.path)}>
+          {filtered.map((game)=><article className="game-card" key={game.path} style={{"--accent":game.accent}} onClick={()=>openGame(game.path,game.category)}>
             <div className="game-art" style={{backgroundImage:`url(${game.image})`}}>
               <span className="game-tag">{game.tag}</span>
               <span className="players"><i/>{game.players} playing</span>

@@ -151,7 +151,7 @@ return(
 </div>
 <div className="mlr-time-left">
 <span>TIME LEFT</span>
-<b>{phase==="betting"?safeCount:phase===""?"GO":phase===""?"STOP":"0"}</b>
+<b>{phase==="betting"?safeCount:phase==="spinning"?"GO":phase==="stopping"?"STOP":"0"}</b>
 <small>{phase==="betting"?"SEC":phase.toUpperCase()}</small>
 </div>
 </div>
@@ -204,8 +204,9 @@ onClick={()=>placeCoinBet(car)}
 </div>
 {phase==="result"&&winner&&(
 <div className="mlr-winner-popup">
-<b>WINNER</b>
+<small>ROUND WINNER</small>
 <CarLogo name={winner.key}/>
+<b>{prettyName(winner.key)}</b>
 </div>
 )}
 </div>
@@ -224,11 +225,10 @@ return(
 <span>♛</span>
 <strong>GOLD365</strong>
 </div>
-<div className="profile">
-<span>🌐</span>
-<span className="balance">{Number(user.balance||0).toFixed(2)}</span>
+<div className="mlr-account">
+<div className="mlr-balance"><small>BALANCE</small><b>₹{Number(user.balance||0).toFixed(2)}</b></div>
 <UserMenuLayout/>
-<span className="user">{user.user_name||"DEMO123"}</span>
+<span className="mlr-user">{user.user_name||"DEMO123"}</span>
 </div>
 </header>
 );
@@ -237,7 +237,7 @@ return(
 function ResultStrip({history}){
 return(
 <section className="mlr-results">
-
+<b>RECENT</b>
 <div className="mlr-result-list">
 {history.length===0?(
 <span className="mlr-empty">No Result</span>
@@ -380,16 +380,6 @@ selectedCoin={selectedCoin}
 setSelectedCoin={setSelectedCoin}
 clearBets={clearBets}
 />
-{phase==="result"&&winner&&(
-<div className="mlr-win">
-<div className="mlr-win-card">
-<h1>WINNER</h1>
-<CarLogo name={winner.key}/>
-<h2>{prettyName(winner.key)}</h2>
-<p>YOU WIN ₹ {money(totalWin)}</p>
-</div>
-</div>
-)}
 </div>
 );
 }
