@@ -38,15 +38,19 @@ function TopBar({ soundOn, setSoundOn }) {
 
   return (
     <header className="dt-topbar">
-      <div className="profile">
-        <span className="balance">{Number(user.balance||0).toFixed(2)}</span>
+      <div className="dt-player">
         <UserMenuLayout/>
-        <span className="user">{user.user_name||"DEMO123"}</span>
+        <span><small>PLAYER</small><b>{user.user_name||"DEMO123"}</b></span>
       </div>
-
       <div className="dt-logo-wrap">
         <i className="dt-logo-dragon" />
+        <strong>DRAGON <em>VS</em> TIGER</strong>
         <i className="dt-logo-tiger" />
+      </div>
+      <div className="dt-wallet">
+        <small>BALANCE</small>
+        <b>₹{Number(user.balance||0).toFixed(2)}</b>
+        <button onClick={() => setSoundOn((value) => !value)}>{soundOn ? "♪" : "×"}</button>
       </div>
     </header>
   );
@@ -107,6 +111,11 @@ function HeroPanel({ data, winner, totalWin }) {
       <div className="dt-hero-vignette" />
       <h1 className="dt-dragon-title">DRAGON</h1>
       <h1 className="dt-tiger-title">TIGER</h1>
+      <div className={`dt-round-state ${data.phase}`}>
+        <i />
+        <span>{data.phase === "betting" ? "PLACE YOUR BETS" : data.phase === "dealing" ? "DEALING CARDS" : data.phase === "result" ? "ROUND RESULT" : "NEXT ROUND"}</span>
+        {data.phase === "betting" && <b>{Math.max(0, Math.ceil(Number(data.countdown || 0)))}</b>}
+      </div>
       <div className="dt-card-stage">
         <PlayingCard side="dragon" card={data.dragon_card} hidden={data.phase === "betting"} />
         <div className="dt-vs-orb">VS</div>
@@ -114,9 +123,9 @@ function HeroPanel({ data, winner, totalWin }) {
       </div>
       {winner && (
         <div className="dt-mini-winner">
-          <span>WINNER</span>
+          <span>ROUND WINNER</span>
           <b>{winner}</b>
-          <em>YOU WON ₹ {formatMoney(totalWin)}</em>
+          {totalWin > 0 && <em>PAID ₹{formatMoney(totalWin)}</em>}
         </div>
       )}
     </section>
@@ -185,6 +194,7 @@ function ChipPanel({ chip, setChip, clearBets }) {
             {value}
           </button>
         ))}
+        <button className="dt-clear-chip" onClick={clearBets}>CLEAR</button>
       </div>
     </footer>
   );
@@ -276,6 +286,7 @@ export default function DragonTiger() {
       <div className="dt-bg-new" />
       <TopBar soundOn={soundOn} setSoundOn={setSoundOn} />
       <main className="dt-shell-new">
+        <InfoBar totalBet={totalBet} totalWin={totalWin}/>
         <ResultHistory history={resultHistory} progress={progress}/>
         <HeroPanel data={data} winner={winner} totalWin={totalWin} />
         <MainBets betMap={betMap} placeBet={placeBet} />
@@ -283,8 +294,7 @@ export default function DragonTiger() {
         <SuitBets placeBet={placeBet} />
       </main>
       <ChipPanel chip={chip} setChip={setChip} clearBets={clearBets} />
-      <WinEffect winner={winner} totalWin={totalWin} />
-      <div className="dt-toast-new">● {notice}</div>
+      {notice && <div className="dt-toast-new">● {notice}</div>}
     </div>
   );
 }
