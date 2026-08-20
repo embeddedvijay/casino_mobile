@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./Mobileaviator.css";
 import UserMenuLayout from "../../shared/UserMenuLayout";
 import{fetchCurrentUser}from"../../shared/userSession";
+import {ArrowLeft, ChevronDown, History, Menu, ShieldCheck, Users, Volume2, Wifi} from "lucide-react";
 
 
 // const API = "http://localhost:8005";
@@ -46,13 +47,13 @@ function Plane({ phase, multiplier }) {
   const r1={x:lerp(q1.x,q2.x,progress),y:lerp(q1.y,q2.y,progress)};
   const end={x:lerp(r0.x,r1.x,progress),y:lerp(r0.y,r1.y,progress)};
   const clamp=(min,value,max)=>Math.max(min,Math.min(value,max));
-  let planeLeft=isFlying?clamp(8,end.x/10,62):8;
-  let planeBottom=isFlying?clamp(8,(420-end.y)/4.2,68):8;
+  let planeLeft=isFlying?clamp(6,end.x/11.5,53):6;
+  let planeBottom=isFlying?clamp(7,(420-end.y)/4.8,60):7;
 
   if (crashed) {
     /* Keep the final crash frame visible inside every screen size. */
-    planeLeft=62;
-    planeBottom=68;
+    planeLeft=53;
+    planeBottom=60;
   }
 
   const curve=`M ${p0.x} ${p0.y} C ${q0.x} ${q0.y}, ${r0.x} ${r0.y}, ${end.x} ${end.y}`;
@@ -81,115 +82,12 @@ function Plane({ phase, multiplier }) {
           bottom: `${planeBottom}%`,
         }}
       >
-        <svg
-          className={`aviator-plane ${crashed ? "crash" : ""}`}
-          viewBox="0 0 520 210"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <linearGradient id="planeRedMain" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ff004f" />
-              <stop offset="45%" stopColor="#f00048" />
-              <stop offset="100%" stopColor="#af002f" />
-            </linearGradient>
-
-            <filter id="planeGlowRed" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="3.5" result="blur" />
-              <feColorMatrix
-                in="blur"
-                type="matrix"
-                values="1 0 0 0 1
-                        0 0 0 0 0
-                        0 0 0 0 0.25
-                        0 0 0 0.9 0"
-                result="glow"
-              />
-              <feMerge>
-                <feMergeNode in="glow" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          <g filter="url(#planeGlowRed)">
-            <path
-              className="flame flame-a"
-              d="M52 136 C18 134 6 126 0 118 C31 121 58 122 91 124 Z"
-            />
-            <path
-              className="flame flame-b"
-              d="M70 154 C30 156 9 148 0 139 C39 137 69 137 112 139 Z"
-            />
-
-            <path
-              className="plane-body"
-              d="M35 126
-                 C98 123 151 118 205 109
-                 L327 73
-                 C357 65 388 61 421 63
-                 L485 65
-                 C507 66 520 75 519 86
-                 C518 97 505 104 481 108
-                 L354 130
-                 C286 142 224 149 155 150
-                 L60 151
-                 C39 151 28 145 27 137
-                 C26 131 29 127 35 126 Z"
-            />
-
-            <path
-              className="plane-nose"
-              d="M421 63 L490 65 C510 67 520 75 519 86 C517 96 506 102 482 107 L431 116 C454 94 453 76 421 63 Z"
-            />
-
-            <path
-              className="wing-main wing-animate"
-              d="M214 113
-                 L151 35
-                 C146 29 149 23 157 24
-                 L214 30
-                 C224 31 230 36 236 44
-                 L308 101 Z"
-            />
-
-            <path
-              className="wing-dark wing-animate"
-              d="M215 114 L169 52 L216 59 L282 103 Z"
-            />
-
-            <path
-              className="tail-top tail-animate"
-              d="M94 124
-                 L45 62
-                 C40 55 43 50 52 51
-                 L89 54
-                 C98 55 104 60 109 67
-                 L164 119 Z"
-            />
-
-            <path
-              className="tail-bottom tail-animate"
-              d="M237 146
-                 L174 199
-                 C167 205 159 203 155 196
-                 L143 173
-                 L202 145 Z"
-            />
-
-            <path className="rear-fin" d="M72 147 L34 181 L99 150 Z" />
-
-            <path className="window-line" d="M278 87 C316 78 358 74 405 76" />
-            <circle className="window" cx="363" cy="82" r="8" />
-            <circle className="window" cx="396" cy="79" r="7" />
-
-            <path className="cut-line" d="M126 128 C198 125 265 111 333 87" />
-            <path className="bottom-line" d="M59 145 C142 147 249 141 355 125" />
-
-            <text className="plane-x" x="330" y="114" transform="rotate(-8 330 114)">
-              X
-            </text>
-          </g>
-        </svg>
+        <img
+          className="aviator-plane-image"
+          src="/casino-assets/aviator-plane.png"
+          alt=""
+          draggable="false"
+        />
 
         <div className="plane-smoke smoke-one" />
         <div className="plane-smoke smoke-two" />
@@ -199,7 +97,7 @@ function Plane({ phase, multiplier }) {
   );
 }
 
-function BetPanel({ seat, phase, multiplier, roundId, myBets, onNotice }) {
+function BetPanel({ seat, phase, multiplier, roundId, myBets, onNotice, userId }) {
   const [amount, setAmount] = useState(50);
   const [auto, setAuto] = useState(false);
 
@@ -208,21 +106,27 @@ function BetPanel({ seat, phase, multiplier, roundId, myBets, onNotice }) {
   const canCashout = phase === "flying" && activeBet?.status === "active";
 
   async function placeBet() {
+    const betAmount=Number(amount);
+    if(!Number.isFinite(betAmount)||betAmount<10){
+      onNotice("Minimum bet is ₹10");
+      return;
+    }
     try {
       const res = await fetch(`${API}/api/games/aviator/bet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: "demo_user",
+          user_id: userId || "demo_user",
           seat,
           amount: Number(amount),
         }),
       });
 
       const data = await res.json();
-      onNotice(data.message || "Done");
-    } catch {
-      onNotice("Backend not connected");
+      if(!res.ok)throw new Error(data.detail||data.message||"Bet failed");
+      onNotice(data.message || "Bet accepted");
+    } catch(error) {
+      onNotice(error.message||"Backend not connected");
     }
   }
 
@@ -232,20 +136,22 @@ function BetPanel({ seat, phase, multiplier, roundId, myBets, onNotice }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: "demo_user",
+          user_id: userId || "demo_user",
           seat,
         }),
       });
 
       const data = await res.json();
-      onNotice(data.message || "Done");
-    } catch {
-      onNotice("Backend not connected");
+      if(!res.ok)throw new Error(data.detail||data.message||"Cashout failed");
+      onNotice(data.message || "Cashed out successfully");
+    } catch(error) {
+      onNotice(error.message||"Backend not connected");
     }
   }
 
   return (
-    <div className="bet-panel">
+    <div className={`bet-panel seat-${seat}`}>
+      <div className="panel-label"><span>BET {seat}</span><i>{activeBet?.status||"READY"}</i></div>
       <div className="tab-switch">
         <button className={!auto ? "active" : ""} onClick={() => setAuto(false)}>
           Bet
@@ -266,24 +172,22 @@ function BetPanel({ seat, phase, multiplier, roundId, myBets, onNotice }) {
           </div>
 
           <div className="quick">
-            <button onClick={() => setAmount(10)}>10</button>
-            <button onClick={() => setAmount(20)}>20</button>
-            <button onClick={() => setAmount(50)}>50</button>
-            <button onClick={() => setAmount(100)}>100</button>
+            <button onClick={() => setAmount(10)}>₹10</button>
+            <button onClick={() => setAmount(50)}>₹50</button>
+            <button onClick={() => setAmount(100)}>₹100</button>
+            <button onClick={() => setAmount(500)}>₹500</button>
           </div>
         </div>
 
         {canCashout ? (
           <button className="bet-btn orange" onClick={cashout}>
-            CASH OUT
-            <br />
-            <span>{formatMoney(Number(activeBet.amount) * multiplier)} INR</span>
+            <small>CASH OUT</small>
+            <span>₹{formatMoney(Number(activeBet.amount) * multiplier)}</span>
           </button>
         ) : (
           <button className="bet-btn" disabled={!canBet} onClick={placeBet}>
-            BET
-            <br />
-            <span>{formatMoney(amount)} INR</span>
+            <small>{canBet?"PLACE BET":phase==="betting"?"BET PLACED":"WAIT NEXT ROUND"}</small>
+            <span>₹{formatMoney(amount)}</span>
           </button>
         )}
       </div>
@@ -317,6 +221,7 @@ function App() {
 
   const [notice, setNotice] = useState("");
   const [showHistory,setShowHistory]=useState(false);
+  const [betTab,setBetTab]=useState("all");
   const wsRef = useRef(null);
 
   useEffect(() => {
@@ -361,8 +266,8 @@ function App() {
     return data.all_bets.reduce((sum, b) => sum + Number(b.bet || 0), 0);
   }, [data.all_bets]);
 
-  const shownMultiplier =
-    data.phase === "betting" ? "WAITING" : `${Number(data.multiplier || 1).toFixed(2)}x`;
+  const gamePhase=data.phase==="waiting"?"betting":data.phase;
+  const shownMultiplier = gamePhase === "betting" ? "WAITING" : `${Number(data.multiplier || 1).toFixed(2)}x`;
   
   const[user,setUser]=useState({user_name:"DEMO123",balance:0});
 
@@ -373,28 +278,29 @@ function App() {
   return (
     <div className="mobile-aviator app">
       <header className="top">
-        <div className="brand">
-          <span className="home">⌂</span>
-          <span>GOLD</span>
-          <b>365</b>
+        <button className="back-button" onClick={()=>window.location.href="/"}><ArrowLeft size={20}/></button>
+        <div className="brand"><span>Aviator</span><small>✈</small></div>
+        <div className="top-tools">
+          <div className="header-balance"><i>₹</i><span>{Number(user.balance||0).toFixed(2)}</span></div>
+          <button><Volume2 size={16}/></button>
+          <button className="menu-button"><Menu size={18}/></button>
         </div>
-
-      <div className="profile">
-        <span>🌐</span>
-        <span className="balance">{Number(user.balance||0).toFixed(2)}</span>
-        <UserMenuLayout/>
-        <span className="user">{user.user_name||"DEMO123"}</span>
-      </div>
       </header>
+
+      <section className="account-strip">
+        <div className="connection"><i/><span>LIVE GAME</span><small>Round #{String(data.round_id||"---").slice(-6)}</small></div>
+        <button className="deposit-mini" onClick={()=>window.location.href="/deposit"}>DEPOSIT</button>
+      </section>
 
       <main className="layout">
         <section className="game-area">
           <div className="history-wrap">
+            <div className="history-label"><History size={14}/><span>Previous rounds</span></div>
             <div className="history">
               {[...(data.history||[])].reverse().slice(0,100).map((v,i)=>(
                 <span key={i} className={historyClass(v)}>{Number(v).toFixed(2)}x</span>
               ))}
-              <button className={`drop ${showHistory?"open":""}`} onClick={()=>setShowHistory(!showHistory)}>⌄</button>
+              <button className={`drop ${showHistory?"open":""}`} onClick={()=>setShowHistory(!showHistory)}><ChevronDown size={16}/></button>
             </div>
             {showHistory&&(
               <div className="history-dropdown">
@@ -407,9 +313,9 @@ function App() {
 
             <div
               className={`canvas ${
-                data.phase === "betting" ? "waiting-mode" : ""
-              } ${data.phase === "flying" ? "flying-mode" : ""} ${
-                data.phase === "crashed" ? "crashed-mode" : ""
+                gamePhase === "betting" ? "waiting-mode" : ""
+              } ${gamePhase === "flying" ? "flying-mode" : ""} ${
+                gamePhase === "crashed" ? "crashed-mode" : ""
               } ${
                 Number(data.multiplier || 1) >= 10
                   ? "hot-bg"
@@ -418,6 +324,7 @@ function App() {
                   : "low-bg"
               }`}
             >
+            <div className="stage-status"><span className={gamePhase}><i/>{gamePhase==="betting"?"BETS OPEN":gamePhase==="flying"?"FLYING":"ROUND ENDED"}</span><small><Wifi size={12}/> LIVE</small></div>
             <div className="rays" />
 
             <div className="axis y">
@@ -432,7 +339,7 @@ function App() {
               ))}
             </div>
 
-              {data.phase === "betting" ? (
+              {gamePhase === "betting" ? (
                 <div className="waiting-box">
                   <div className="loader-plane">
                     <svg viewBox="0 0 80 80">
@@ -443,7 +350,8 @@ function App() {
                     <span className="loader-ring ring-3" />
                   </div>
 
-                  <div className="waiting-text">WAITING FOR NEXT ROUND</div>
+                  <div className="waiting-text">NEXT ROUND STARTS IN</div>
+                  <div className="countdown-value">{Math.max(0,Math.ceil(Number(data.countdown||0)))}s</div>
 
                   <div className="timer-bar">
                     <div
@@ -462,7 +370,7 @@ function App() {
                     />
                   </div>
                 </div>
-              ): data.phase === "crashed" ? (
+              ): gamePhase === "crashed" ? (
               <div className="crash-center">
                 <div className="flew-text">FLEW AWAY!</div>
                 <div className="flew-multiplier">
@@ -473,36 +381,62 @@ function App() {
               <div className="multiplier">{shownMultiplier}</div>
             )}
 
-            <Plane phase={data.phase} multiplier={Number(data.multiplier || 1)} />
+            <Plane phase={gamePhase} multiplier={Number(data.multiplier || 1)} />
           </div>
 
-          <div className="round">Round Id: {data.round_id}</div>
+          <div className="game-meta"><span><ShieldCheck size={13}/> Provably fair</span><span><Users size={13}/>{(data.all_bets||[]).length} players</span><span>Total ₹{formatMoney(totalBet)}</span></div>
 
           <div className="panels">
             <BetPanel
               seat={1}
-              phase={data.phase}
+              phase={gamePhase}
               multiplier={Number(data.multiplier || 1)}
               roundId={data.round_id}
               myBets={data.my_bets || []}
               onNotice={setNotice}
+              userId={user.user_id||user.id||user.user_name}
             />
 
             <BetPanel
               seat={2}
-              phase={data.phase}
+              phase={gamePhase}
               multiplier={Number(data.multiplier || 1)}
               roundId={data.round_id}
               myBets={data.my_bets || []}
               onNotice={setNotice}
+              userId={user.user_id||user.id||user.user_name}
             />
           </div>
+
+          <section className="bets-board">
+            <div className="bets-tabs">
+              <button className={betTab==="all"?"active":""} onClick={()=>setBetTab("all")}>All Bets</button>
+              <button className={betTab==="mine"?"active":""} onClick={()=>setBetTab("mine")}>My Bets</button>
+              <button className={betTab==="top"?"active":""} onClick={()=>setBetTab("top")}>Top</button>
+            </div>
+            <div className="bets-summary"><span><Users size={13}/>{(data.all_bets||[]).length} players</span><strong>₹{formatMoney(totalBet)}</strong></div>
+            <div className="bets-head"><span>Player</span><span>Bet INR</span><span>Multiplier</span><span>Cash out</span></div>
+            <div className="bets-list">
+              {(betTab==="mine"?(data.my_bets||[]):(data.all_bets||[])).slice(0,12).map((bet,index)=>{
+                const player=bet.user_name||bet.username||bet.user_id||`Player ${index+1}`;
+                const amount=bet.bet??bet.amount??0;
+                const cashMultiplier=bet.cashout_multiplier||bet.multiplier;
+                const cashAmount=bet.cashout_amount||0;
+                return <div className={`bets-row ${cashAmount?"won":""}`} key={bet.id||`${player}-${index}`}>
+                  <span><i>{String(player).slice(0,1).toUpperCase()}</i>{String(player).slice(0,12)}</span>
+                  <span>₹{formatMoney(amount)}</span>
+                  <span>{cashMultiplier?`${Number(cashMultiplier).toFixed(2)}x`:"—"}</span>
+                  <strong>{cashAmount?`₹${formatMoney(cashAmount)}`:"—"}</strong>
+                </div>;
+              })}
+              {!(betTab==="mine"?(data.my_bets||[]):(data.all_bets||[])).length&&<div className="empty-bets">No bets in this round</div>}
+            </div>
+            <div className="fair-row"><span><ShieldCheck size={13}/>This game is provably fair</span><UserMenuLayout/></div>
+          </section>
         </section>
       </main>
 
-      <div className="toast">
-        {notice} <span>Total bets: {formatMoney(totalBet)}</span>
-      </div>
+      {notice&&<div className="toast"><i/>{notice}<button onClick={()=>setNotice("")}>×</button></div>}
     </div>
   );
 }
