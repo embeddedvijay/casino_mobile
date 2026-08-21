@@ -10,6 +10,9 @@ cd android
 
 ./gradlew installDebug
 
-adb -s emulator-5554 shell monkey \
--p com.gold365.casino \
--c android.intent.category.LAUNCHER 1
+adb -s 127.0.0.1:6555 shell am force-stop \
+com.gold365.casino
+
+adb -s 127.0.0.1:6555 shell am start \
+-W \
+-n com.gold365.casino/.MainActivity
