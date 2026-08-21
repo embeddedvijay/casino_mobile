@@ -1,0 +1,4 @@
+.ab-card.small:last-child{animation:abDeal .36s cubic-bezier(.2,.9,.25,1)}
+.ab-status.dealing i{display:block;width:70%;height:3px;margin:8px auto 0;border-radius:5px;background:linear-gradient(90deg,#d8ad4b,#fff0a0,#d8ad4b);background-size:200% 100%;animation:abScan .8s linear infinite}
+@keyframes abDeal{from{opacity:0;transform:translate(70px,-150px) rotate(25deg) scale(.65)}to{opacity:1;transform:translate(0,0) rotate(0) scale(1)}}
+@keyframes abScan{to{background-position:200% 0}}

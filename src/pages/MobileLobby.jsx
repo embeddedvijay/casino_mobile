@@ -7,8 +7,9 @@ const games=[
   {path:"/dragon-tiger",tag:"LIVE",category:"Casino",image:"/casino-assets/dragon-tiger.png",name:"Dragon Tiger",accent:"#ffba25",players:"1.6K"},
   {path:"/lucky-race",tag:"NEW",category:"Racing",image:"/casino-assets/lucky-race.png",name:"Lucky Race",accent:"#a970ff",players:"928"},
   {path:"/matka",tag:"POPULAR",category:"Matka",image:"/casino-assets/matka.png",name:"Matka",accent:"#df4cff",players:"4.2K"},
-  {path:"/color-ball",tag:"FREE",category:"Free",image:"/casino-assets/color-ball.svg",name:"Color Blast",accent:"#35dfff",players:"PLAY"},
   {path:"/bubble-shooter",tag:"FREE",category:"Free",image:"/casino-assets/bubble-shooter.svg",name:"Bubble Pop",accent:"#35dfff",players:"PLAY"},
+  {path:"/teen-patti-practice",tag:"PRACTICE",category:"Free",image:"/casino-assets/teen-patti.svg",name:"Teen Patti",accent:"#e4b956",players:"2 BOTS"},
+  ,{path:"/andar-bahar-practice",tag:"PRACTICE",category:"Free",image:"/casino-assets/andar-bahar.svg",name:"Andar Bahar",accent:"#39d999",players:"PLAY"}
 ];
 
 const categories=["All Games","Free","Crash","Casino","Racing","Matka"];

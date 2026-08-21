@@ -1,0 +1,2 @@
+import{dealHands}from"./teenPattiEngine.jsx";
+export const teenPattiService={async startSession(){return{balance:1000,history:[]}},async dealRound(balance,history=[]){return{balance:Math.max(0,balance-10),pot:30,boot:10,hands:dealHands(),active:{user:true,bot1:true,bot2:true},seen:false,chaals:0,phase:"playing",winner:null,message:"PLAY BLIND OR SEE YOUR CARDS",history}},async saveRound(state){return{ok:true,state}}};
