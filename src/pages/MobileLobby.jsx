@@ -10,6 +10,7 @@ const games=[
   {path:"/bubble-shooter",tag:"FREE",category:"Free",image:"/casino-assets/bubble-shooter.svg",name:"Bubble Pop",accent:"#35dfff",players:"PLAY"},
   {path:"/teen-patti-practice",tag:"PRACTICE",category:"Free",image:"/casino-assets/teen-patti.svg",name:"Teen Patti",accent:"#e4b956",players:"2 BOTS"},
   ,{path:"/andar-bahar-practice",tag:"PRACTICE",category:"Free",image:"/casino-assets/andar-bahar.svg",name:"Andar Bahar",accent:"#39d999",players:"PLAY"}
+  ,{path:"/fruit-merge",tag:"FREE",category:"Free",image:"/casino-assets/fruit-merge.svg",name:"Fruit Merge",accent:"#f07ebd",players:"PLAY"}
 ];
 
 const categories=["All Games","Free","Crash","Casino","Racing","Matka"];
