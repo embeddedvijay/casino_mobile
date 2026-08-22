@@ -4,70 +4,129 @@ import"./MobilematkaDashboardInput.css";
 import { API_BASE } from "../../config.js";
 const API=API_BASE;
 
-const getValue=(market,keys)=>{
-  if(market===undefined||market===null)return"";
+const playLabel=(key,marketName)=>`${String(marketName||"").replaceAll("_"," ")} ${String(key||"").endsWith("_CL")?"CLOSE":"OPEN"}`;
 
-  if(typeof market!=="object"){
-    return String(market).trim();
-  }
+const normalizeKey=value=>String(value||"")
+  .trim()
+  .toUpperCase()
+  .replace(/[\s-]+/g,"_");
 
-  for(const key of keys){
-    const value=market[key];
+const cleanResult=value=>{
+  if(value===undefined||value===null)return"";
+  const text=String(value).trim();
+  return["","*","**","-","--","***","***-*","***-**"].includes(text)?"":text;
+};
 
-    if(
-      value!==undefined&&
-      value!==null&&
-      String(value).trim()!==""
-    ){
-      return String(value).trim();
+const readField=(record,names)=>{
+  if(record===undefined||record===null)return"";
+  if(typeof record!=="object")return cleanResult(record);
+  for(const name of names){
+    const matched=Object.keys(record).find(key=>normalizeKey(key)===normalizeKey(name));
+    if(matched){
+      const value=cleanResult(record[matched]);
+      if(value)return value;
     }
   }
-
   return"";
 };
 
-const hasResult=(value)=>value!==""&&value!=="*"&&value!=="**"&&value!=="-"&&value!=="--";
+const parseMarketResults=(data,marketName)=>{
+  const wanted=normalizeKey(marketName).replace(/_(OP|CL)$/g,"");
+  const roots=[data?.Result,data?.result,data?.results,data?.data,data]
+    .filter(value=>value!==undefined&&value!==null);
+  let open="";
+  let close="";
 
-const playLabel=(key,marketName)=>`${String(marketName||"").replaceAll("_"," ")} ${String(key||"").endsWith("_CL")?"CLOSE":"OPEN"}`;
+  const readRecord=(record,recordName="")=>{
+    if(!record||typeof record!=="object")return;
+    const name=normalizeKey(recordName||record.market_name||record.market||record.name||record.key||record.market_key);
+    const base=name.replace(/_(OP|CL)$/g,"");
+    if(base&&base!==wanted)return;
 
-const getMarketResult=(data,marketName)=>{
-  const results=data?.Result&&typeof data.Result==="object"?data.Result:data||{};
-  const keys=[marketName,`${marketName}_OP`,marketName.replace("_DAY",""),marketName.replace("_NIGHT","")];
-  for(const key of keys){
-    if(results[key])return results[key];
+    if(name===`${wanted}_OP`){
+      open=open||readField(record,["value","result","number","jodi","OPEN","OPEN_RESULT"]);
+    }else if(name===`${wanted}_CL`){
+      close=close||readField(record,["value","result","number","jodi","CLOSE","CLOSE_RESULT"]);
+    }else{
+      open=open||readField(record,["OPEN","OP","OPEN_RESULT","openResult"]);
+      close=close||readField(record,["CLOSE","CL","CLOSE_RESULT","closeResult"]);
+    }
+  };
+
+  for(const root of roots){
+    if(Array.isArray(root)){
+      root.forEach(row=>readRecord(row));
+      continue;
+    }
+    if(!root||typeof root!=="object")continue;
+
+    for(const [key,value] of Object.entries(root)){
+      const normalized=normalizeKey(key);
+      if(normalized===`${wanted}_OP`){
+        open=open||readField(value,["value","result","number","jodi","OPEN","OPEN_RESULT"]);
+      }else if(normalized===`${wanted}_CL`){
+        close=close||readField(value,["value","result","number","jodi","CLOSE","CLOSE_RESULT"]);
+      }else if(normalized.replace(/_(OP|CL)$/g,"")===wanted){
+        readRecord(value,key);
+      }
+    }
   }
-  return null;
+
+  return{open,close};
+};
+
+const indiaMinutesNow=()=>{
+  const parts=new Intl.DateTimeFormat("en-GB",{
+    timeZone:"Asia/Kolkata",
+    hour:"2-digit",
+    minute:"2-digit",
+    hourCycle:"h23"
+  }).formatToParts(new Date());
+  const hour=Number(parts.find(item=>item.type==="hour")?.value||0);
+  const minute=Number(parts.find(item=>item.type==="minute")?.value||0);
+  return hour*60+minute;
+};
+
+const timeToMinutes=value=>{
+  const match=String(value||"").trim().match(/^(\d{1,2}):(\d{2})/);
+  if(!match)return null;
+  const hour=Number(match[1]);
+  const minute=Number(match[2]);
+  if(hour>23||minute>59)return null;
+  return hour*60+minute;
 };
 
 const resolvePlayTimeKey=async(marketName)=>{
   try{
-    const configRes=await fetch(`${API}/api/games/matka/markets`,{cache:"no-store"});
-    if(!configRes.ok)return null;
-    const configData=await configRes.json();
+    const[configRes,resultRes]=await Promise.all([
+      fetch(`${API}/api/games/matka/markets`,{cache:"no-store"}),
+      fetch(`${API}/api/games/matka/results/latest`,{cache:"no-store"})
+    ]);
+    const configData=configRes.ok?await configRes.json():{};
     const markets=Array.isArray(configData)?configData:Array.isArray(configData?.markets)?configData.markets:[];
-    const config=markets.find((item)=>String(item.key||"").trim().toUpperCase()===marketName);
+    const wanted=normalizeKey(marketName);
+    const config=markets.find(item=>normalizeKey(
+      item.key||item.market_key||item.market_name||item.name
+    ).replace(/_(OP|CL)$/g,"")===wanted);
+    const closeMinutes=timeToMinutes(
+      config?.close_time||config?.closeTime||config?.close||config?.close_bet_time
+    );
+    const resultData=resultRes.ok?await resultRes.json():{};
+    const{open,close}=parseMarketResults(resultData,marketName);
+    const now=indiaMinutesNow();
 
-    /* Open result is authoritative and must be checked before device time. */
-    const resultRes=await fetch(`${API}/api/games/matka/results/latest`,{cache:"no-store"});
-    if(resultRes.ok){
-      const market=getMarketResult(await resultRes.json(),marketName);
-      const open=getValue(market,["OPEN","open","OP","op","OPEN_RESULT","open_result"]);
-      if(hasResult(open))return`${marketName}_CL`;
-    }
+    /* Close result or configured close time means no more entries. */
+    if(close)return"CLOSED";
+    if(closeMinutes!==null&&now>=closeMinutes)return"CLOSED";
 
-    if(!config?.open_time||!/^(\d{1,2}):(\d{2})$/.test(config.open_time))return`${marketName}_OP`;
+    /* Open result switches the play to CLOSE until closing time. */
+    if(open)return`${marketName}_CL`;
 
-    const[,hour,minute]=config.open_time.match(/^(\d{1,2}):(\d{2})$/);
-    const now=new Date();
-    const currentMinutes=now.getHours()*60+now.getMinutes();
-    const openMinutes=Number(hour)*60+Number(minute);
-    if(currentMinutes<openMinutes)return`${marketName}_OP`;
-
-    /* Open time passed, but result is still pending. */
-    return null;
+    /* Until an open result exists, entry remains OPEN. */
+    return`${marketName}_OP`;
   }catch(e){
     console.error("Market phase check failed",e);
-    return null;
+    return`${marketName}_OP`;
   }
 };
 
@@ -135,12 +194,14 @@ export default function MatkaInput({marketName:marketFromApp=""}){
     const cleanMessage=message.trim();
 
     const nextTimeKey=await resolvePlayTimeKey(marketName);
-    if(!nextTimeKey){
+    if(nextTimeKey==="CLOSED"){
+      setTimeKey("CLOSED");
       setSentMessage(cleanMessage);
-      setServerResponse("Wait for open result");
+      setServerResponse("Market is closed");
       setMsgTime(nowTime());
       setResponseTime(nowTime());
       setConfirmed(false);
+      clearInput();
       return;
     }
 
@@ -191,7 +252,7 @@ export default function MatkaInput({marketName:marketFromApp=""}){
   };
 
   const confirmMessage=async()=>{
-    if(serverResponse==="Wait for open result")return;
+    if(serverResponse==="Market is closed")return;
     if(!serverResponse){
       alert("Pehle send karo");
       return;
@@ -287,14 +348,14 @@ export default function MatkaInput({marketName:marketFromApp=""}){
           <div className="mci-msg-row bot">
             <div className="mci-bot-icon">🤖</div>
             <div className="mci-bubble bot response">
-              <h4>{playLabel(timeKey,marketName)} RESPONSE</h4>
+              <h4>{timeKey==="CLOSED"?`${marketName.replaceAll("_"," ")} CLOSED`: `${playLabel(timeKey,marketName)} RESPONSE`}</h4>
               <pre>{serverResponse}</pre>
               <small>{responseTime}</small>
             </div>
           </div>
         )}
 
-        {serverResponse!=="Wait for open result"&&serverResponse&&!confirmed&&(
+        {serverResponse!=="Market is closed"&&serverResponse&&!confirmed&&(
           <button className="mci-confirm-message" onClick={confirmMessage} disabled={confirming}>
             <span>🛡</span>
             {confirming?"CONFIRMING...":"CONFIRM MESSAGE"}
